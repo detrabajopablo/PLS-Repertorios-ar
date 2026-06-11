@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>PLS Repertorio</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f0f;--bg2:#181818;--bg3:#222;--bg4:#2c2c2c;--bg5:#363636;
+  --text:#f0ede8;--text2:#a09a92;--text3:#5a5550;
+  --accent:#d4a843;--accent2:#a07830;--accent3:#f0c870;
+  --border:#2a2a2a;--border2:#3a3a3a;
+  --danger:#c85a5a;--success:#5a9e7a;
+  --chord-color:#d4a843;--lyric-color:#f0ede8;
+  --font-size:15px;
+}
+[data-theme=light]{
+  --bg:#f8f5f0;--bg2:#eeeae2;--bg3:#e4dfd5;--bg4:#d8d2c8;--bg5:#ccc6ba;
+  --text:#1a1714;--text2:#5a5248;--text3:#9a9288;
+  --accent:#8b5e1e;--accent2:#c8922e;--accent3:#6b4520;
+  --border:#ddd8cc;--border2:#c8c2b8;
+  --chord-color:#8b5e1e;--lyric-color:#1a1714;
+}
+body{font-family:'Georgia',serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:var(--font-size)}
+button{font-family:'Georgia',serif;cursor:pointer;border:none;background:none;color:var(--text)}
+input,textarea,select{font-family:'Georgia',serif;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:6px;width:100%;font-size:14px}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+textarea{resize:vertical;line-height:1.6}
+
+.nav{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;flex-direction:column;line-height:1.1}
+.nav-logo-main{font-size:17px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.nav-logo-sub{font-size:9px;color:var(--text3);letter-spacing:3px;text-transform:uppercase}
+.nav-btns{display:flex;gap:6px}
+.nav-btn{width:34px;height:34px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text2);transition:all .2s}
+.nav-btn:hover{background:var(--bg4);color:var(--text)}
+
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{padding:9px 14px;font-size:12px;color:var(--text2);white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;flex-shrink:0;letter-spacing:.5px}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.screen{display:none}.screen.active{display:block}
+
+.search-wrap{padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.search-row{display:flex;gap:8px}
+.search-wrap input{flex:1;font-size:13px}
+
+.btn-primary{background:var(--accent);color:#000;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap;transition:all .2s;border:1px solid var(--accent)}
+.btn-primary:hover{opacity:.85}
+.btn-secondary{background:var(--bg3);color:var(--text);padding:7px 12px;border-radius:6px;font-size:12px;border:1px solid var(--border2);transition:all .2s}
+.btn-secondary:hover{background:var(--bg4)}
+.btn-save-ver{background:#1e3a5a;color:#8ab8e8;padding:7px 12px;border-radius:6px;font-size:12px;border:1px solid #2a4a6a;transition:all .2s}
+.btn-save-ver:hover{background:#2a4a7a}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:5px}
+.btn-danger{background:var(--danger);color:#fff;padding:5px 10px;border-radius:5px;font-size:11px;border:1px solid var(--danger)}
+
+.song-list{padding:6px 12px;padding-bottom:70px}
+.alpha-label{font-size:10px;color:var(--text3);letter-spacing:2px;padding:10px 4px 4px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.song-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden;transition:border-color .2s}
+.song-card:hover{border-color:var(--accent2)}
+.song-card-header{display:flex;align-items:flex-start;padding:10px 12px;gap:8px}
+.song-card-info{flex:1;min-width:0;cursor:pointer}
+.song-title{font-size:14px;font-weight:700;color:var(--text)}
+.song-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.song-note{font-size:10px;color:var(--accent);margin-top:1px;font-style:italic}
+.song-actions{display:flex;gap:5px;flex-shrink:0}
+.icon-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);transition:all .2s}
+.icon-btn:hover{background:var(--bg4);color:var(--accent)}
+.badge{display:inline-block;padding:1px 6px;border-radius:10px;font-size:9px;background:var(--bg4);color:var(--text2);border:1px solid var(--border2);margin-right:3px}
+.badge.key{background:var(--accent2);color:var(--accent3);border-color:var(--accent2)}
+
+.versions-panel{display:none;border-top:1px solid var(--border);background:var(--bg3)}
+.versions-panel.open{display:block}
+.version-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.version-item:last-child{border-bottom:none}
+.version-item:hover{background:var(--bg4)}
+.version-arrow{font-size:10px;color:var(--accent)}
+.version-info{flex:1}
+.version-title{font-size:12px;color:var(--text2)}
+.version-note{font-size:10px;color:var(--accent);font-style:italic}
+
+.viewer-header{padding:12px 14px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.viewer-top-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.viewer-title{font-size:20px;font-weight:700;margin-bottom:2px}
+.viewer-artist{font-size:13px;color:var(--text2);margin-bottom:6px}
+.viewer-note-box{background:var(--bg3);border-left:3px solid var(--accent);padding:6px 10px;font-size:11px;color:var(--accent);margin-bottom:8px;font-style:italic;border-radius:0 4px 4px 0}
+.viewer-controls{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.transpose-ctrl{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:4px 8px}
+.transpose-ctrl span{font-size:12px;color:var(--text2);min-width:56px;text-align:center}
+.t-btn{width:26px;height:26px;border-radius:5px;background:var(--bg4);color:var(--text);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);transition:all .2s}
+.t-btn:hover{background:var(--accent);color:#000;border-color:var(--accent)}
+
+.format-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.format-bar label{font-size:11px;color:var(--text2)}
+.size-ctrl{display:flex;align-items:center;gap:4px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:3px 6px}
+.sz-btn{width:24px;height:24px;border-radius:4px;background:var(--bg5);color:var(--text);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);transition:all .2s}
+.sz-btn:hover{background:var(--accent);color:#000}
+.sz-display{font-size:11px;color:var(--text2);min-width:28px;text-align:center}
+.color-group{display:flex;align-items:center;gap:5px}
+.color-swatch{width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);cursor:pointer;transition:border-color .15s;flex-shrink:0}
+.color-swatch.active{border-color:var(--accent)}
+.color-swatch:hover{border-color:var(--text2)}
+
+.viewer-body{padding:14px;padding-bottom:80px;overflow-x:auto}
+.song-block{margin-bottom:1.4em}
+.chord-line{font-family:'Courier New',monospace;color:var(--chord-color);font-weight:700;white-space:pre;line-height:1.2}
+.lyric-line{color:var(--lyric-color);white-space:pre;line-height:1.6}
+.inline-chord{color:var(--chord-color);font-weight:700;font-family:'Courier New',monospace;cursor:pointer}
+.inline-chord:hover{text-decoration:underline}
+.chord-token{cursor:pointer;display:inline}
+.chord-token:hover{text-decoration:underline}
+.empty-line{height:.7em}
+.section-label{font-size:11px;color:var(--text3);font-style:italic;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;padding-top:6px}
+
+.chord-popup{position:fixed;z-index:300;background:var(--bg2);border:1px solid var(--accent2);border-radius:12px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.6);width:280px;max-width:92vw}
+.chord-popup-title{font-size:17px;font-weight:700;color:var(--accent3);margin-bottom:10px;text-align:center}
+.chord-diagrams{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chord-diagram-label{font-size:10px;color:var(--text2);text-align:center;margin-bottom:3px}
+.chord-popup-close{position:absolute;top:8px;right:10px;font-size:16px;color:var(--text2);cursor:pointer}
+
+.editor-wrap{padding:14px;padding-bottom:80px}
+.ed-section{margin-bottom:14px}
+.ed-label{font-size:10px;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.ed-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ed-hint{font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4}
+.ed-toolbar{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;padding:6px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)}
+.ed-toolbar button{background:var(--bg4);border:1px solid var(--border2);color:var(--text2);padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer}
+.ed-toolbar button:hover{background:var(--bg5);color:var(--text)}
+
+.groups-list{padding:8px 12px;padding-bottom:70px}
+.group-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.group-header{display:flex;align-items:center;padding:10px 12px;gap:8px;cursor:pointer}
+.group-name{flex:1;font-size:14px;font-weight:700}
+.group-count{font-size:11px;color:var(--text2)}
+.group-songs-panel{display:none;border-top:1px solid var(--border)}
+.group-songs-panel.open{display:block}
+.group-song-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.group-song-row:last-child{border-bottom:none}
+.group-song-row:hover{background:var(--bg3)}
+
+.import-wrap{padding:14px;padding-bottom:70px}
+.import-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px}
+.import-card h3{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px}
+.import-card p{font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.5}
+.import-preview{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:10px;font-family:'Courier New',monospace;font-size:11px;max-height:140px;overflow-y:auto;color:var(--text2);margin-top:8px;white-space:pre;overflow-x:auto}
+
+.backup-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px}
+.backup-card h3{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px}
+.backup-card p{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.6}
+.backup-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-box{background:var(--bg3);border-radius:6px;padding:8px 10px;text-align:center}
+.stat-num{font-size:22px;font-weight:700;color:var(--accent)}
+.stat-label{font-size:10px;color:var(--text2);margin-top:2px}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px 14px 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto}
+.modal h2{font-size:15px;margin-bottom:14px;color:var(--accent)}
+.modal-btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+.modal-drag{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 14px}
+
+.toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--success);color:#fff;padding:9px 18px;border-radius:20px;font-size:12px;opacity:0;transition:all .3s;z-index:400;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--danger)}
+
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:100}
+.bb-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;font-size:9px;color:var(--text3);gap:3px;transition:all .2s;letter-spacing:.5px}
+.bb-btn.active{color:var(--accent)}
+.bb-btn:hover{color:var(--text2)}
+.bb-icon{font-size:18px}
+
+.empty{text-align:center;padding:40px 16px;color:var(--text3)}
+.empty-icon{font-size:36px;margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-main">PLS</div>
+    <div class="nav-logo-sub">Repertorio</div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="themeBtn" title="Tema">☀️</button>
+    <button class="nav-btn" id="newSongBtn" title="Nueva canción">✏️</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="canciones">🎵 Canciones</div>
+  <div class="tab" data-tab="grupos">📂 Grupos</div>
+  <div class="tab" data-tab="importar">➕ Importar</div>
+  <div class="tab" data-tab="backup">💾 Backup</div>
+</div>
+
+<!-- CANCIONES -->
+<div class="screen active" id="tab-canciones">
+  <div class="search-wrap">
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="🔍 Buscar canción, artista...">
+      <select id="filterGroup" style="width:auto;flex-shrink:0;padding:7px 8px;font-size:12px">
+        <option value="">Todos</option>
+      </select>
+    </div>
+  </div>
+  <div class="song-list" id="songList"></div>
+</div>
+
+<!-- GRUPOS -->
+<div class="screen" id="tab-grupos">
+  <div style="padding:10px 12px;display:flex;gap:8px;background:var(--bg2);border-bottom:1px solid var(--border)">
+    <button class="btn-primary btn-sm" id="newGroupBtn">+ Nuevo grupo</button>
+  </div>
+  <div class="groups-list" id="groupsList"></div>
+</div>
+
+<!-- IMPORTAR -->
+<div class="screen" id="tab-importar">
+  <div class="import-wrap">
+    <div class="import-card">
+      <h3>📋 Pegar texto con acordes</h3>
+      <p>Copiá desde CifraClub, La Cuerda u otra web. Los acordes sobre la letra se respetan tal cual al pegar.</p>
+      <input type="text" id="importTitle" placeholder="Título de la canción" style="margin-bottom:6px">
+      <input type="text" id="importArtist" placeholder="Artista" style="margin-bottom:6px">
+      <textarea id="importText" rows="7" placeholder="Pegá aquí la letra con acordes. Ejemplo:
+
+      G         Em        Bm
+Como el ciervo busca por las aguas,
+   C      G    DO  RE
+así clama mi alma por ti Señor."></textarea>
+      <div id="importPreview" class="import-preview" style="display:none"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn-secondary btn-sm" id="previewImportBtn">👁 Vista previa</button>
+        <button class="btn-primary btn-sm" id="importSaveBtn">💾 Guardar</button>
+      </div>
+    </div>
+    <div class="import-card">
+      <h3>📄 Importar archivo (.txt)</h3>
+      <p>Cargá un archivo de texto plano (.txt) con la letra y acordes.</p>
+      <input type="file" id="fileInput" accept=".txt" style="margin-bottom:8px">
+      <div id="filePreview" class="import-preview" style="display:none"></div>
+      <button class="btn-primary btn-sm" id="fileSaveBtn" style="margin-top:6px;display:none">💾 Guardar canción</button>
+    </div>
+  </div>
+</div>
+
+<!-- BACKUP -->
+<div class="screen" id="tab-backup">
+  <div class="import-wrap">
+    <div class="backup-card">
+      <h3>📊 Mi repertorio</h3>
+      <div class="backup-stats">
+        <div class="stat-box"><div class="stat-num" id="statSongs">0</div><div class="stat-label">canciones</div></div>
+        <div class="stat-box"><div class="stat-num" id="statGroups">0</div><div class="stat-label">grupos</div></div>
+      </div>
+    </div>
+    <div class="backup-card">
+      <h3>⬇️ Exportar backup</h3>
+      <p>Descargá todas tus canciones y grupos en un archivo <strong>.json</strong>.<br>Guardalo en Google Drive, envialo por WhatsApp o email para tenerlo seguro y poder restaurarlo en cualquier dispositivo.</p>
+      <button class="btn-primary" id="exportBtn" style="width:100%">⬇️ Descargar backup (.json)</button>
+    </div>
+    <div class="backup-card">
+      <h3>⬆️ Restaurar backup</h3>
+      <p>Cargá un archivo .json exportado previamente. Podés fusionar (agrega canciones nuevas sin borrar las existentes) o reemplazar todo.</p>
+      <input type="file" id="restoreFile" accept=".json" style="margin-bottom:10px">
+      <div id="restorePreview" style="display:none;margin-bottom:10px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2)"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-secondary" id="restoreMergeBtn" style="display:none">🔀 Fusionar</button>
+        <button class="btn-danger" id="restoreReplaceBtn" style="display:none">🔄 Reemplazar todo</button>
+      </div>
+    </div>
+    <div class="backup-card">
+      <h3>📱 Instalar como app en Android</h3>
+      <p>
+        1. Abrí este archivo en <strong>Chrome</strong> en tu Android<br>
+        2. Tocá el menú ⋮ (tres puntos, arriba a la derecha)<br>
+        3. Seleccioná <strong>"Agregar a pantalla de inicio"</strong><br>
+        4. ¡Listo! Queda como app con ícono propio<br><br>
+        Los datos se guardan en el dispositivo y funcionan sin internet.
+      </p>
+    </div>
+    <div class="backup-card">
+      <h3>🔄 Pasar datos entre dispositivos</h3>
+      <p>
+        1. En el dispositivo A → <strong>Exportar backup</strong> → guardá el archivo .json<br>
+        2. Enviá el archivo por <strong>WhatsApp, Drive o email</strong> al dispositivo B<br>
+        3. En el dispositivo B → <strong>Restaurar backup</strong> → cargá el .json<br>
+        4. Elegí <strong>Fusionar</strong> para no perder lo que ya tenés
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- VIEWER -->
+<div class="screen" id="screen-viewer">
+  <div class="viewer-header">
+    <div class="viewer-top-bar">
+      <button class="btn-secondary btn-sm" id="backFromViewer">← Volver</button>
+      <div style="flex:1"></div>
+      <button class="btn-secondary btn-sm" id="editFromViewer">✏️ Editar</button>
+      <button class="btn-secondary btn-sm" id="addToGroupBtn">📂 Grupo</button>
+    </div>
+    <div class="viewer-title" id="viewerTitle"></div>
+    <div class="viewer-artist" id="viewerArtist"></div>
+    <div class="viewer-note-box" id="viewerNote" style="display:none"></div>
+    <div class="viewer-controls">
+      <div class="transpose-ctrl">
+        <button class="t-btn" id="tDown">−</button>
+        <span id="transposeLabel">Original</span>
+        <button class="t-btn" id="tUp">+</button>
+      </div>
+      <button class="btn-secondary btn-sm" id="tReset">↺ Reset</button>
+      <button class="btn-save-ver btn-sm" id="saveToneBtn">💾 Nueva versión</button>
+    </div>
+  </div>
+  <div class="format-bar">
+    <label>Tamaño:</label>
+    <div class="size-ctrl">
+      <button class="sz-btn" id="szDown">−</button>
+      <span class="sz-display" id="szDisplay">15</span>
+      <button class="sz-btn" id="szUp">+</button>
+    </div>
+    <label style="margin-left:6px">Letra:</label>
+    <div class="color-group" id="lyricColors">
+      <div class="color-swatch active" data-lc="#f0ede8" style="background:#f0ede8"></div>
+      <div class="color-swatch" data-lc="#a8d8a8" style="background:#a8d8a8"></div>
+      <div class="color-swatch" data-lc="#a8c8e8" style="background:#a8c8e8"></div>
+      <div class="color-swatch" data-lc="#f8e8a8" style="background:#f8e8a8"></div>
+      <div class="color-swatch" data-lc="#ffffff" style="background:#fff;border-color:#888"></div>
+    </div>
+    <label style="margin-left:6px">Acordes:</label>
+    <div class="color-group" id="chordColors">
+      <div class="color-swatch active" data-cc="#d4a843" style="background:#d4a843"></div>
+      <div class="color-swatch" data-cc="#f87070" style="background:#f87070"></div>
+      <div class="color-swatch" data-cc="#70c8f8" style="background:#70c8f8"></div>
+      <div class="color-swatch" data-cc="#90e890" style="background:#90e890"></div>
+      <div class="color-swatch" data-cc="#e890e8" style="background:#e890e8"></div>
+    </div>
+  </div>
+  <div class="viewer-body" id="viewerBody"></div>
+</div>
+
+<!-- EDITOR -->
+<div class="screen" id="screen-editor">
+  <div style="padding:10px 14px;display:flex;gap:6px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap">
+    <button class="btn-secondary btn-sm" id="backFromEditor">← Volver</button>
+    <div style="flex:1"></div>
+    <button class="btn-save-ver btn-sm" id="saveNewVersionBtn">+ Nueva versión</button>
+    <button class="btn-primary btn-sm" id="saveEditorBtn">💾 Guardar</button>
+  </div>
+  <div class="editor-wrap">
+    <div class="ed-section">
+      <div class="ed-label">Título y artista</div>
+      <div class="ed-row">
+        <input type="text" id="edTitle" placeholder="Título">
+        <input type="text" id="edArtist" placeholder="Artista">
+      </div>
+    </div>
+    <div class="ed-section">
+      <div class="ed-label">Nota / anotación</div>
+      <input type="text" id="edNote" placeholder='Ej: "Versión en G para Juan" · "Setlist domingo"'>
+    </div>
+    <div class="ed-section">
+      <div class="ed-row">
+        <div>
+          <div class="ed-label">Tonalidad</div>
+          <input type="text" id="edKey" placeholder="Ej: Am, G, C">
+        </div>
+        <div>
+          <div class="ed-label">Tags (separados por coma)</div>
+          <input type="text" id="edTags" placeholder="rock, balada, setlist">
+        </div>
+      </div>
+    </div>
+    <div class="ed-section">
+      <div class="ed-label">Letra con acordes</div>
+      <div class="ed-hint" style="margin-bottom:6px">Escribí acordes en la línea encima de la palabra. Respetá los espacios para alinearlos correctamente. También podés usar [Am] dentro de la letra.</div>
+      <div class="ed-toolbar">
+        <button onclick="insertSection('Intro')">Intro</button>
+        <button onclick="insertSection('Verso')">Verso</button>
+        <button onclick="insertSection('Coro')">Coro</button>
+        <button onclick="insertSection('Puente')">Puente</button>
+        <button onclick="insertSection('Final')">Final</button>
+      </div>
+      <textarea id="edContent" rows="18" style="font-family:'Courier New',monospace;font-size:13px;line-height:1.5" placeholder="      G         Em        Bm
+Como el ciervo busca por las aguas,
+   C      G    DO  RE
+así clama mi alma por ti Señor.
+"></textarea>
+    </div>
+    <input type="hidden" id="edId">
+    <input type="hidden" id="edParentId">
+  </div>
+</div>
+
+<!-- CHORD POPUP -->
+<div class="chord-popup" id="chordPopup" style="display:none">
+  <div class="chord-popup-title" id="chordPopupTitle"></div>
+  <button class="chord-popup-close" id="closeChordPopup">✕</button>
+  <div class="chord-diagrams">
+    <div>
+      <div class="chord-diagram-label">🎸 Guitarra</div>
+      <canvas id="guitarCanvas" width="118" height="120"></canvas>
+    </div>
+    <div>
+      <div class="chord-diagram-label">🎹 Piano</div>
+      <canvas id="pianoCanvas" width="118" height="75"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD TO GROUP -->
+<div class="modal-overlay" id="groupModal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h2>📂 Agregar a grupo</h2>
+    <div id="groupModalList"></div>
+    <div class="modal-btns"><button class="btn-secondary" id="closeGroupModal">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: SAVE VERSION -->
+<div class="modal-overlay" id="saveToneModal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h2>💾 Guardar nueva versión</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Se crea una copia con el tono actual transpuesto como versión independiente.</p>
+    <div class="ed-section">
+      <div class="ed-label">Nota para esta versión</div>
+      <input type="text" id="saveToneNote" placeholder='Ej: "Versión en G para Juan"'>
+    </div>
+    <div class="ed-section" style="margin-top:10px">
+      <div class="ed-label">Tonalidad</div>
+      <input type="text" id="saveToneKey" placeholder="Ej: G, Am, C...">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-secondary" id="closeSaveToneModal">Cancelar</button>
+      <button class="btn-primary" id="confirmSaveToneBtn">Crear versión</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NEW GROUP -->
+<div class="modal-overlay" id="newGroupModal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h2>✨ Nuevo grupo</h2>
+    <div class="ed-section">
+      <div class="ed-label">Nombre</div>
+      <input type="text" id="newGroupName" placeholder="Ej: Setlist domingo, Canciones de Juan...">
+    </div>
+    <div class="ed-section" style="margin-top:10px">
+      <div class="ed-label">Emoji</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <span style="font-size:20px;cursor:pointer" data-emoji="🎸">🎸</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="🎹">🎹</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="🎵">🎵</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="🎼">🎼</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="🎤">🎤</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="🎉">🎉</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="⛪">⛪</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="🌙">🌙</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="📋">📋</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="❤️">❤️</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="🔥">🔥</span>
+        <span style="font-size:20px;cursor:pointer" data-emoji="✝️">✝️</span>
+      </div>
+      <input type="text" id="newGroupEmoji" placeholder="O escribí tu emoji" maxlength="4" style="width:80px">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-secondary" id="closeNewGroupModal">Cancelar</button>
+      <button class="btn-primary" id="saveNewGroupBtn">Crear grupo</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="bottom-bar">
+  <button class="bb-btn active" data-tab="canciones"><span class="bb-icon">🎵</span>Canciones</button>
+  <button class="bb-btn" data-tab="grupos"><span class="bb-icon">📂</span>Grupos</button>
+  <button class="bb-btn" data-tab="importar"><span class="bb-icon">➕</span>Importar</button>
+  <button class="bb-btn" data-tab="backup"><span class="bb-icon">💾</span>Backup</button>
+</div>
+
+<script>
+// ===== DATA =====
+function getAll(){try{return JSON.parse(localStorage.getItem('pls_db')||'{}')}catch(e){return{}}}
+function saveAll(d){localStorage.setItem('pls_db',JSON.stringify(d))}
+function db(){const d=getAll();if(!d.songs)d.songs=[];if(!d.groups)d.groups=[];return d}
+
+// ===== CHORD DATA =====
+const CHORDS={
+  'C':{g:[[0],[0,2,1],[0,3,2],[0,2,3],[0,1,0],[0]],p:[0,4,7]},
+  'Cm':{g:[[-1],[-1],[3,1],[5,2],[5,3],[4,4],[3,5]],p:[0,3,7]},
+  'C7':{g:[[0],[0,3,3],[0,2,2],[0,3,4],[0,1,1],[0]],p:[0,4,7,10]},
+  'Cmaj7':{g:[[0],[0,2,1],[0,0,0],[0,0,0],[0,0,0],[0]],p:[0,4,7,11]},
+  'D':{g:[[-1],[-1],[0],[0,2,1],[0,3,2],[0,2,3]],p:[2,6,9]},
+  'Dm':{g:[[-1],[-1],[0],[0,2,2],[0,3,3],[0,1,1]],p:[2,5,9]},
+  'D7':{g:[[-1],[-1],[0],[0,2,2],[0,1,1],[0,2,3]],p:[2,6,9,0]},
+  'E':{g:[[0],[0,2,1],[0,2,2],[0,1,3],[0],[0]],p:[4,8,11]},
+  'Em':{g:[[0],[0,2,1],[0,2,2],[0],[0],[0]],p:[4,7,11]},
+  'E7':{g:[[0],[0,2,1],[0],[0,1,3],[0],[0]],p:[4,8,11,2]},
+  'F':{g:[[1,1],[1,1],[2,2],[3,3],[3,4],[1,1]],p:[5,9,0]},
+  'Fm':{g:[[1,1],[1,1],[1,1],[3,3],[3,4],[1,1]],p:[5,8,0]},
+  'F7':{g:[[1,1],[1,1],[2,2],[1,3],[1,1],[1,1]],p:[5,9,0,3]},
+  'G':{g:[[3,1],[2,2],[0],[0],[0],[3,3]],p:[7,11,2]},
+  'Gm':{g:[[3,1],[5,2],[5,3],[3,1],[3,1],[3,1]],p:[7,10,2]},
+  'G7':{g:[[3,1],[2,2],[0],[0],[0],[1,3]],p:[7,11,2,5]},
+  'A':{g:[[-1],[0],[2,1],[2,2],[2,3],[0]],p:[9,1,4]},
+  'Am':{g:[[-1],[0],[2,1],[2,2],[1,3],[0]],p:[9,0,4]},
+  'A7':{g:[[-1],[0],[2,1],[0],[2,3],[0]],p:[9,1,4,7]},
+  'Am7':{g:[[-1],[0],[2,1],[0],[1,3],[0]],p:[9,0,4,7]},
+  'B':{g:[[-1],[-1],[2,1],[4,2],[4,3],[4,4]],p:[11,3,6]},
+  'Bm':{g:[[-1],[-1],[2,1],[4,2],[4,3],[3,4]],p:[11,2,6]},
+  'B7':{g:[[-1],[2,1],[1,2],[2,3],[0],[2,5]],p:[11,3,6,9]},
+};
+const CHROM=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const ENH={'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#','DO':'C','RE':'D','MI':'E','FA':'F','SOL':'G','LA':'A','SI':'B'};
+const CHORD_RE=/\b([A-G][#b]?(?:maj7|m7|7|m|maj|sus2|sus4|aug|dim|add9|6|9)?)\b/g;
+
+function normalizeChord(c){return ENH[c.toUpperCase()]||ENH[c]||c}
+function transposeChord(c,s){
+  const m=c.match(/^([A-G][#b]?)(.*)/);
+  if(!m)return c;
+  const norm=ENH[m[1]]||m[1];
+  let i=CHROM.indexOf(norm);
+  if(i===-1)return c;
+  return CHROM[(i+s+12)%12]+m[2];
+}
+function transposeText(txt,s){
+  if(!s)return txt;
+  return txt.replace(CHORD_RE,m=>transposeChord(m,s));
+}
+
+// ===== RENDER BODY =====
+function isChordLine(line){
+  if(!line||!line.trim())return false;
+  const tokens=line.trim().split(/\s+/).filter(Boolean);
+  if(!tokens.length||tokens.length>14)return false;
+  let hits=0;
+  tokens.forEach(t=>{
+    CHORD_RE.lastIndex=0;
+    const spRe=/^(DO|RE|MI|FA|SOL|LA|SI)[#b]?[m7]?$/i;
+    if(CHORD_RE.test(t)||spRe.test(t))hits++;
+    CHORD_RE.lastIndex=0;
+  });
+  return hits/tokens.length>=0.55;
+}
+
+function makeChordLineHTML(line){
+  return line.replace(/([A-G][#b]?(?:maj7|m7|7|m|maj|sus2|sus4|aug|dim|add9|6|9)?|DO|RE|MI|FA|SOL|LA|SI[b#]?[m7]?)/g,
+    c=>`<span class="chord-token" data-chord="${normalizeChord(c)||c}">${c}</span>`);
+}
+
+function renderSongBody(content,container){
+  container.innerHTML='';
+  const lines=(content||'').split('\n');
+  let i=0;
+  while(i<lines.length){
+    const line=lines[i];
+    if(!line&&!lines[i].trim()){
+      const el=document.createElement('div');el.className='empty-line';container.appendChild(el);i++;continue;
+    }
+    if(isChordLine(line)&&i+1<lines.length&&lines[i+1].trim()&&!isChordLine(lines[i+1])){
+      const block=document.createElement('div');block.className='song-block';
+      const cl=document.createElement('div');cl.className='chord-line';cl.innerHTML=makeChordLineHTML(line);
+      const ll=document.createElement('div');ll.className='lyric-line';
+      if(/\[[A-G][^\]]*\]/.test(lines[i+1])){
+        ll.innerHTML=lines[i+1].replace(/\[([A-G][^\]]*)\]/g,(m,c)=>`<span class="inline-chord" data-chord="${c}">[${c}]</span>`);
+      }else ll.textContent=lines[i+1];
+      block.appendChild(cl);block.appendChild(ll);container.appendChild(block);i+=2;
+    } else if(isChordLine(line)){
+      const cl=document.createElement('div');cl.className='chord-line';cl.innerHTML=makeChordLineHTML(line);container.appendChild(cl);i++;
+    } else if(/^(Intro|Verso|Coro|Puente|Final|Estribillo|Bridge|Chorus|Verse)\s*[:\-]?/i.test(line.trim())){
+      const sl=document.createElement('div');sl.className='section-label';sl.textContent=line;container.appendChild(sl);i++;
+    } else {
+      const ll=document.createElement('div');ll.className='lyric-line';
+      if(/\[[A-G][^\]]*\]/.test(line)){
+        ll.innerHTML=line.replace(/\[([A-G][^\]]*)\]/g,(m,c)=>`<span class="inline-chord" data-chord="${c}">[${c}]</span>`);
+      }else ll.textContent=line;
+      container.appendChild(ll);i++;
+    }
+  }
+  container.querySelectorAll('.chord-token,.inline-chord').forEach(el=>{
+    el.addEventListener('click',function(e){showChordPopup(this.dataset.chord||this.textContent.replace(/[\[\]]/g,''),e)});
+  });
+}
+
+// ===== STATE =====
+let currentSong=null,transposeSteps=0,fontSize=15,isDark=true;
+
+// ===== TABS =====
+function showTab(tab){
+  document.querySelectorAll('.tab,.bb-btn').forEach(e=>e.classList.toggle('active',e.dataset.tab===tab));
+  document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');if(s.id==='tab-'+tab)s.classList.add('active')});
+  if(tab==='canciones')renderSongs();
+  if(tab==='grupos')renderGroups();
+  if(tab==='backup')updateStats();
+}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+document.querySelectorAll('.tab,.bb-btn').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'☀️':'🌙';
+});
+
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(type==='err'?' err':'');
+  setTimeout(()=>t.className='toast',2800);
+}
+
+// ===== SONG LIST =====
+function renderSongs(){
+  const data=db();
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const gf=document.getElementById('filterGroup').value;
+  const fg=document.getElementById('filterGroup');
+  const prev=fg.value;
+  fg.innerHTML='<option value="">Todos los grupos</option>';
+  data.groups.forEach(g=>fg.innerHTML+=`<option value="${g.id}">${g.emoji||'📂'} ${g.name}</option>`);
+  fg.value=prev;
+
+  let roots=data.songs.filter(s=>!s.parentId);
+  if(q)roots=roots.filter(s=>(s.title+s.artist+(s.note||'')).toLowerCase().includes(q));
+  if(gf){const grp=data.groups.find(g=>g.id===gf);if(grp)roots=roots.filter(s=>grp.songs&&grp.songs.includes(s.id))}
+  roots.sort((a,b)=>(a.title||'').localeCompare(b.title||'','es',{sensitivity:'base'}));
+
+  const el=document.getElementById('songList');
+  if(!roots.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🎵</div><p>No hay canciones</p><p style="font-size:11px;margin-top:6px">Usá ✏️ o la pestaña Importar</p></div>`;return}
+
+  el.innerHTML='';let lastLetter='';
+  roots.forEach(s=>{
+    const letter=(s.title||'?')[0].toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(letter!==lastLetter){
+      const sep=document.createElement('div');sep.className='alpha-label';sep.textContent=letter;el.appendChild(sep);lastLetter=letter;
+    }
+    const versions=data.songs.filter(v=>v.parentId===s.id);
+    const card=document.createElement('div');card.className='song-card';
+
+    const header=document.createElement('div');header.className='song-card-header';
+    header.innerHTML=`
+      <div class="song-card-info" id="ci-${s.id}">
+        <div class="song-title">${s.title||'Sin título'}</div>
+        <div class="song-meta">${s.artist||''}${s.key?` · <span class="badge key">${s.key}</span>`:''}${(s.tags||'').split(',').filter(t=>t.trim()).map(t=>`<span class="badge">${t.trim()}</span>`).join('')}</div>
+        ${s.note?`<div class="song-note">📝 ${s.note}</div>`:''}
+        ${versions.length?`<div style="font-size:10px;color:var(--text3);margin-top:3px">▸ ${versions.length} versión(es) — tocá para ver</div>`:''}
+      </div>
+      <div class="song-actions">
+        <button class="icon-btn" id="ei-${s.id}" title="Editar">✏️</button>
+        <button class="icon-btn" id="di-${s.id}" title="Eliminar">🗑️</button>
+      </div>`;
+    card.appendChild(header);
+
+    if(versions.length){
+      const vp=document.createElement('div');vp.className='versions-panel';vp.id='vp-'+s.id;
+      // Also include the original as first option
+      const allV=[{...s,note:(s.note||'')+'(original)',_isRoot:true},...versions];
+      allV.forEach(v=>{
+        const vi=document.createElement('div');vi.className='version-item';
+        vi.innerHTML=`<span class="version-arrow">↳</span>
+          <div class="version-info">
+            <div class="version-title">${v._isRoot?'▶ Original':'▶ '+( v.note||v.title)}</div>
+            ${v.key?`<span class="badge key">${v.key}</span>`:''}
+          </div>
+          <button class="icon-btn btn-sm" title="Abrir">▶</button>
+          ${!v._isRoot?`<button class="icon-btn btn-sm" data-dv="${v.id}" title="Eliminar">🗑️</button>`:''}`;
+        vi.querySelector('.icon-btn').addEventListener('click',e=>{e.stopPropagation();openSong(v.id)});
+        const db2=vi.querySelector('[data-dv]');
+        if(db2)db2.addEventListener('click',e=>{e.stopPropagation();deleteSong(v.id)});
+        vp.appendChild(vi);
+      });
+      card.appendChild(vp);
+    }
+    el.appendChild(card);
+
+    document.getElementById('ci-'+s.id).addEventListener('click',()=>{
+      if(versions.length){document.getElementById('vp-'+s.id)?.classList.toggle('open')}
+      else openSong(s.id);
+    });
+    document.getElementById('ei-'+s.id).addEventListener('click',e=>{e.stopPropagation();editSong(s.id)});
+    document.getElementById('di-'+s.id).addEventListener('click',e=>{e.stopPropagation();deleteSong(s.id)});
+  });
+}
+
+// ===== VIEWER =====
+function openSong(id){
+  const data=db();
+  currentSong=data.songs.find(s=>s.id===id);
+  if(!currentSong)return;
+  transposeSteps=0;
+  document.getElementById('viewerTitle').textContent=currentSong.title||'Sin título';
+  document.getElementById('viewerArtist').textContent=currentSong.artist||'';
+  const ne=document.getElementById('viewerNote');
+  if(currentSong.note){ne.textContent='📝 '+currentSong.note;ne.style.display='block'}else ne.style.display='none';
+  document.getElementById('transposeLabel').textContent='Original';
+  document.getElementById('viewerBody').style.fontSize=fontSize+'px';
+  renderSongBody(currentSong.content||'',document.getElementById('viewerBody'));
+  showScreen('screen-viewer');
+}
+
+document.getElementById('szUp').addEventListener('click',()=>{if(fontSize<36){fontSize++;document.getElementById('viewerBody').style.fontSize=fontSize+'px';document.getElementById('szDisplay').textContent=fontSize}});
+document.getElementById('szDown').addEventListener('click',()=>{if(fontSize>10){fontSize--;document.getElementById('viewerBody').style.fontSize=fontSize+'px';document.getElementById('szDisplay').textContent=fontSize}});
+
+document.querySelectorAll('#lyricColors .color-swatch').forEach(s=>s.addEventListener('click',function(){
+  document.querySelectorAll('#lyricColors .color-swatch').forEach(x=>x.classList.remove('active'));
+  this.classList.add('active');
+  document.documentElement.style.setProperty('--lyric-color',this.dataset.lc);
+}));
+document.querySelectorAll('#chordColors .color-swatch').forEach(s=>s.addEventListener('click',function(){
+  document.querySelectorAll('#chordColors .color-swatch').forEach(x=>x.classList.remove('active'));
+  this.classList.add('active');
+  document.documentElement.style.setProperty('--chord-color',this.dataset.cc);
+}));
+
+document.getElementById('tUp').addEventListener('click',()=>{
+  transposeSteps=(transposeSteps+1)%12;updateTLabel();
+  renderSongBody(transposeText(currentSong.content||'',transposeSteps),document.getElementById('viewerBody'));
+});
+document.getElementById('tDown').addEventListener('click',()=>{
+  transposeSteps=(transposeSteps-1+12)%12;updateTLabel();
+  renderSongBody(transposeText(currentSong.content||'',transposeSteps),document.getElementById('viewerBody'));
+});
+document.getElementById('tReset').addEventListener('click',()=>{
+  transposeSteps=0;document.getElementById('transposeLabel').textContent='Original';
+  renderSongBody(currentSong.content||'',document.getElementById('viewerBody'));
+});
+function updateTLabel(){document.getElementById('transposeLabel').textContent=transposeSteps===0?'Original':(transposeSteps>0?'+':'')+transposeSteps+' st'}
+
+document.getElementById('saveToneBtn').addEventListener('click',()=>{
+  document.getElementById('saveToneNote').value='';document.getElementById('saveToneKey').value='';
+  document.getElementById('saveToneModal').classList.add('open');
+});
+document.getElementById('closeSaveToneModal').addEventListener('click',()=>document.getElementById('saveToneModal').classList.remove('open'));
+document.getElementById('confirmSaveToneBtn').addEventListener('click',()=>{
+  if(!currentSong)return;
+  const note=document.getElementById('saveToneNote').value.trim()||'Versión '+(transposeSteps>0?'+':'')+transposeSteps+' st';
+  const key=document.getElementById('saveToneKey').value.trim();
+  const data=db();
+  data.songs.push({id:'s'+Date.now(),title:currentSong.title,artist:currentSong.artist,note,key,tags:currentSong.tags||'',
+    content:transposeText(currentSong.content||'',transposeSteps),parentId:currentSong.parentId||currentSong.id,createdAt:Date.now()});
+  saveAll(data);document.getElementById('saveToneModal').classList.remove('open');toast('Versión guardada ✓');
+});
+
+document.getElementById('backFromViewer').addEventListener('click',()=>showTab('canciones'));
+document.getElementById('editFromViewer').addEventListener('click',()=>{if(currentSong)editSong(currentSong.id)});
+
+document.getElementById('addToGroupBtn').addEventListener('click',()=>{
+  const data=db();const el=document.getElementById('groupModalList');
+  if(!data.groups.length){el.innerHTML='<p style="font-size:12px;color:var(--text2);padding:8px 0">No tenés grupos. Creá uno en la pestaña Grupos.</p>'}
+  else el.innerHTML=data.groups.map(g=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+    <span style="font-size:18px">${g.emoji||'📂'}</span>
+    <span style="flex:1;font-size:13px">${g.name}</span>
+    <button class="btn-secondary btn-sm" onclick="addSongToGroup('${g.id}')">+ Agregar</button>
+  </div>`).join('');
+  document.getElementById('groupModal').classList.add('open');
+});
+document.getElementById('closeGroupModal').addEventListener('click',()=>document.getElementById('groupModal').classList.remove('open'));
+function addSongToGroup(gid){
+  if(!currentSong)return;
+  const data=db();const g=data.groups.find(x=>x.id===gid);if(!g)return;
+  if(!g.songs)g.songs=[];
+  if(g.songs.includes(currentSong.id)){toast('Ya está en ese grupo','err');return}
+  g.songs.push(currentSong.id);saveAll(data);
+  toast('Agregada a "'+g.name+'" ✓');document.getElementById('groupModal').classList.remove('open');
+}
+
+// ===== EDITOR =====
+function editSong(id){
+  const data=db();const s=id?data.songs.find(x=>x.id===id)||{}:{};
+  document.getElementById('edId').value=s.id||'';
+  document.getElementById('edTitle').value=s.title||'';
+  document.getElementById('edArtist').value=s.artist||'';
+  document.getElementById('edNote').value=s.note||'';
+  document.getElementById('edKey').value=s.key||'';
+  document.getElementById('edTags').value=s.tags||'';
+  document.getElementById('edContent').value=s.content||'';
+  document.getElementById('edParentId').value=s.parentId||'';
+  showScreen('screen-editor');
+}
+document.getElementById('newSongBtn').addEventListener('click',()=>editSong(''));
+document.getElementById('backFromEditor').addEventListener('click',()=>{if(currentSong)showScreen('screen-viewer');else showTab('canciones')});
+
+function saveSong(asNewVersion){
+  const data=db();const id=document.getElementById('edId').value;
+  const parentId=document.getElementById('edParentId').value;
+  const song={
+    id:asNewVersion?'s'+Date.now():(id||'s'+Date.now()),
+    title:document.getElementById('edTitle').value.trim()||'Sin título',
+    artist:document.getElementById('edArtist').value.trim(),
+    note:document.getElementById('edNote').value.trim(),
+    key:document.getElementById('edKey').value.trim(),
+    tags:document.getElementById('edTags').value.trim(),
+    content:document.getElementById('edContent').value,
+    parentId:asNewVersion?(parentId||id||''):'',
+    createdAt:Date.now()
+  };
+  if(!asNewVersion&&id){
+    const idx=data.songs.findIndex(s=>s.id===id);
+    if(idx>=0)data.songs[idx]={...data.songs[idx],...song,id};
+    else data.songs.push(song);
+  }else data.songs.push(song);
+  saveAll(data);currentSong=song;
+  toast(asNewVersion?'Nueva versión guardada ✓':'Guardado ✓');
+  openSong(song.id);
+}
+document.getElementById('saveEditorBtn').addEventListener('click',()=>saveSong(false));
+document.getElementById('saveNewVersionBtn').addEventListener('click',()=>saveSong(true));
+
+function deleteSong(id){
+  if(!confirm('¿Eliminar esta canción?'))return;
+  const data=db();
+  data.songs=data.songs.filter(s=>s.id!==id&&s.parentId!==id);
+  data.groups.forEach(g=>{if(g.songs)g.songs=g.songs.filter(sid=>sid!==id)});
+  saveAll(data);toast('Eliminada');renderSongs();
+}
+function insertSection(name){
+  const ta=document.getElementById('edContent');const pos=ta.selectionStart;
+  const ins='\n'+name+':\n';ta.value=ta.value.substring(0,pos)+ins+ta.value.substring(pos);
+  ta.focus();ta.selectionStart=ta.selectionEnd=pos+ins.length;
+}
+
+// ===== CHORD POPUP =====
+function drawGuitar(canvas,cn){
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+  const cd=CHORDS[cn]||CHORDS[cn.replace(/b/,'')];
+  const dark=isDark;
+  const fg=dark?'#d4a843':'#8b5e1e';const fg2=dark?'#a09a92':'#5a5248';const bg=dark?'#1a1a1a':'#f0ede8';
+  ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);
+  if(!cd){
+    ctx.fillStyle=fg2;ctx.font='11px Georgia';ctx.textAlign='center';
+    ctx.fillText('Acorde: '+cn,59,45);ctx.fillText('(no disponible)',59,62);return;
+  }
+  const sx=12,sy=18,sw=16,fh=18,nf=5;
+  ctx.strokeStyle=fg2;
+  for(let i=0;i<6;i++){ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx+i*sw,sy);ctx.lineTo(sx+i*sw,sy+nf*fh);ctx.stroke()}
+  for(let i=0;i<=nf;i++){ctx.lineWidth=i===0?3:0.8;ctx.beginPath();ctx.moveTo(sx,sy+i*fh);ctx.lineTo(sx+5*sw,sy+i*fh);ctx.stroke()}
+  cd.g.forEach((f,i)=>{
+    const x=sx+i*sw;
+    if(!f||f[0]===-1){ctx.fillStyle=fg2;ctx.font='bold 11px Georgia';ctx.textAlign='center';ctx.fillText('×',x,sy-5)}
+    else if(f[0]===0){ctx.strokeStyle=fg;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,sy-5,4,0,Math.PI*2);ctx.stroke()}
+    else{ctx.fillStyle=fg;ctx.beginPath();ctx.arc(x,sy+(f[0]-.5)*fh,7,0,Math.PI*2);ctx.fill()}
+  });
+}
+function drawPiano(canvas,cn){
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+  const cd=CHORDS[cn]||CHORDS[cn.replace(/b/,'')];
+  const dark=isDark;
+  const bg=dark?'#1a1a1a':'#f0ede8';const wk=dark?'#ddd8d0':'#ffffff';const bk='#111';const hl=dark?'#d4a843':'#8b5e1e';const br=dark?'#3a3a3a':'#c8c2b8';
+  ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);
+  if(!cd)return;
+  const notes=cd.p.map(n=>n%12);
+  const whites=[0,2,4,5,7,9,11,0,2,4,5,7,9,11];
+  const ww=8,wh=60,sx=3,sy=6;
+  whites.forEach((note,i)=>{
+    ctx.fillStyle=notes.includes(note)?hl:wk;ctx.strokeStyle=br;ctx.lineWidth=0.8;
+    ctx.fillRect(sx+i*ww,sy,ww-1,wh);ctx.strokeRect(sx+i*ww,sy,ww-1,wh);
+  });
+  const bpos=[0,1,3,4,5,7,8,10,11,12,14,15];
+  const bnotes=[1,3,6,8,10,13,15,18,20,22,25,27];
+  bpos.forEach((p,i)=>{
+    const n=bnotes[i]%12;
+    ctx.fillStyle=notes.includes(n)?hl:bk;
+    ctx.fillRect(sx+p*ww+5,sy,6,38);
+  });
+}
+function showChordPopup(cn,e){
+  const pop=document.getElementById('chordPopup');
+  pop.style.display='block';
+  document.getElementById('chordPopupTitle').textContent=cn;
+  drawGuitar(document.getElementById('guitarCanvas'),cn);
+  drawPiano(document.getElementById('pianoCanvas'),cn);
+  const rect=e.target.getBoundingClientRect();
+  let top=rect.bottom+window.scrollY+8;
+  let left=rect.left+window.scrollX-80;
+  if(left<6)left=6;if(left+290>window.innerWidth)left=window.innerWidth-296;
+  if(top+260>window.innerHeight+window.scrollY)top=rect.top+window.scrollY-270;
+  pop.style.top=top+'px';pop.style.left=left+'px';
+}
+document.getElementById('closeChordPopup').addEventListener('click',()=>document.getElementById('chordPopup').style.display='none');
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.chord-token')&&!e.target.closest('.inline-chord')&&!e.target.closest('#chordPopup'))
+    document.getElementById('chordPopup').style.display='none';
+});
+
+// ===== GROUPS =====
+function renderGroups(){
+  const data=db();const el=document.getElementById('groupsList');
+  if(!data.groups.length){el.innerHTML=`<div class="empty"><div class="empty-icon">📂</div><p>No hay grupos</p></div>`;return}
+  el.innerHTML='';
+  data.groups.forEach(g=>{
+    const songs=(g.songs||[]).map(id=>data.songs.find(s=>s.id===id)).filter(Boolean);
+    const card=document.createElement('div');card.className='group-card';
+    card.innerHTML=`
+      <div class="group-header" onclick="toggleGroup('${g.id}')">
+        <span style="font-size:20px">${g.emoji||'📂'}</span>
+        <span class="group-name">${g.name}</span>
+        <span class="group-count">${songs.length} canciones</span>
+        <button class="icon-btn btn-sm" onclick="event.stopPropagation();deleteGroup('${g.id}')">🗑️</button>
+      </div>
+      <div class="group-songs-panel" id="gsp-${g.id}">
+        ${songs.length?songs.map(s=>`<div class="group-song-row" onclick="openSong('${s.id}')">
+          <div style="flex:1"><div style="font-size:13px">${s.title}</div>
+          <div style="font-size:11px;color:var(--text2)">${s.artist||''}${s.note?' · '+s.note:''}</div></div>
+          <button class="icon-btn btn-sm" onclick="event.stopPropagation();removeFromGroup('${g.id}','${s.id}')">✕</button>
+        </div>`).join(''):'<div style="padding:12px;font-size:12px;color:var(--text3)">Sin canciones</div>'}
+      </div>`;
+    el.appendChild(card);
+  });
+}
+function toggleGroup(id){document.getElementById('gsp-'+id)?.classList.toggle('open')}
+function deleteGroup(id){if(!confirm('¿Eliminar grupo?'))return;const data=db();data.groups=data.groups.filter(g=>g.id!==id);saveAll(data);toast('Grupo eliminado');renderGroups()}
+function removeFromGroup(gid,sid){const data=db();const g=data.groups.find(x=>x.id===gid);if(g&&g.songs)g.songs=g.songs.filter(id=>id!==sid);saveAll(data);toast('Quitada del grupo');renderGroups()}
+
+document.getElementById('newGroupBtn').addEventListener('click',()=>{
+  document.getElementById('newGroupName').value='';document.getElementById('newGroupEmoji').value='🎵';
+  document.getElementById('newGroupModal').classList.add('open');
+});
+document.getElementById('closeNewGroupModal').addEventListener('click',()=>document.getElementById('newGroupModal').classList.remove('open'));
+document.querySelectorAll('[data-emoji]').forEach(e=>e.addEventListener('click',function(){document.getElementById('newGroupEmoji').value=this.dataset.emoji}));
+document.getElementById('saveNewGroupBtn').addEventListener('click',()=>{
+  const name=document.getElementById('newGroupName').value.trim();if(!name){toast('Ingresá un nombre','err');return}
+  const emoji=document.getElementById('newGroupEmoji').value.trim()||'📂';
+  const data=db();data.groups.push({id:'g'+Date.now(),name,emoji,songs:[]});saveAll(data);
+  document.getElementById('newGroupModal').classList.remove('open');toast('Grupo creado ✓');renderGroups();
+});
+
+// ===== IMPORT =====
+document.getElementById('previewImportBtn').addEventListener('click',()=>{
+  const t=document.getElementById('importText').value;const p=document.getElementById('importPreview');
+  p.style.display='block';p.textContent=t.substring(0,500)+(t.length>500?'...':'');
+});
+document.getElementById('importSaveBtn').addEventListener('click',()=>{
+  const title=document.getElementById('importTitle').value.trim()||'Importada '+new Date().toLocaleDateString('es');
+  const artist=document.getElementById('importArtist').value.trim();
+  const content=document.getElementById('importText').value.trim();
+  if(!content){toast('Pegá el contenido primero','err');return}
+  const data=db();
+  data.songs.push({id:'s'+Date.now(),title,artist,note:'',key:'',tags:'',content,parentId:'',createdAt:Date.now()});
+  saveAll(data);
+  document.getElementById('importTitle').value='';document.getElementById('importArtist').value='';
+  document.getElementById('importText').value='';document.getElementById('importPreview').style.display='none';
+  toast('Canción importada ✓');showTab('canciones');
+});
+document.getElementById('fileInput').addEventListener('change',function(){
+  const file=this.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const t=e.target.result;
+    document.getElementById('filePreview').style.display='block';
+    document.getElementById('filePreview').textContent=t.substring(0,500)+(t.length>500?'...':'');
+    const btn=document.getElementById('fileSaveBtn');btn.style.display='inline-block';
+    btn.dataset.content=t;btn.dataset.name=file.name.replace(/\.[^.]+$/,'');
+  };
+  r.readAsText(file,'UTF-8');
+});
+document.getElementById('fileSaveBtn').addEventListener('click',function(){
+  const data=db();
+  data.songs.push({id:'s'+Date.now(),title:this.dataset.name||'Archivo importado',artist:'',note:'Importado desde archivo',key:'',tags:'',content:this.dataset.content,parentId:'',createdAt:Date.now()});
+  saveAll(data);toast('Importado ✓');
+  document.getElementById('filePreview').style.display='none';this.style.display='none';
+  showTab('canciones');
+});
+
+// ===== BACKUP =====
+function updateStats(){
+  const data=db();
+  document.getElementById('statSongs').textContent=(data.songs||[]).length;
+  document.getElementById('statGroups').textContent=(data.groups||[]).length;
+}
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  const data=db();
+  const json=JSON.stringify({version:'pls-1.0',exportDate:new Date().toISOString(),data},null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  a.download='PLS_Repertorio_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(url);toast('Backup descargado ✓');
+});
+document.getElementById('restoreFile').addEventListener('change',function(){
+  const file=this.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const bk=JSON.parse(e.target.result);
+      const songs=(bk.data?.songs||[]).length;const groups=(bk.data?.groups||[]).length;
+      document.getElementById('restorePreview').style.display='block';
+      document.getElementById('restorePreview').innerHTML=`<strong>Backup del ${(bk.exportDate||'').slice(0,10)||'?'}</strong><br>${songs} canciones · ${groups} grupos`;
+      document.getElementById('restoreFile').dataset.backup=e.target.result;
+      document.getElementById('restoreMergeBtn').style.display='inline-block';
+      document.getElementById('restoreReplaceBtn').style.display='inline-block';
+    }catch(err){toast('Archivo inválido','err')}
+  };
+  r.readAsText(file,'UTF-8');
+});
+document.getElementById('restoreMergeBtn').addEventListener('click',()=>{
+  try{
+    const bk=JSON.parse(document.getElementById('restoreFile').dataset.backup);
+    const data=db();const existIds=new Set(data.songs.map(s=>s.id));let added=0;
+    (bk.data?.songs||[]).forEach(s=>{if(!existIds.has(s.id)){data.songs.push(s);added++}});
+    const existGids=new Set(data.groups.map(g=>g.id));
+    (bk.data?.groups||[]).forEach(g=>{if(!existGids.has(g.id))data.groups.push(g)});
+    saveAll(data);updateStats();toast('Fusionado: '+added+' canciones nuevas ✓');
+  }catch(e){toast('Error al restaurar','err')}
+});
+document.getElementById('restoreReplaceBtn').addEventListener('click',()=>{
+  if(!confirm('¿Reemplazar TODOS tus datos actuales con el backup?'))return;
+  try{
+    const bk=JSON.parse(document.getElementById('restoreFile').dataset.backup);
+    saveAll(bk.data||{songs:[],groups:[]});updateStats();toast('Datos restaurados ✓');renderSongs();
+  }catch(e){toast('Error','err')}
+});
+
+document.getElementById('searchInput').addEventListener('input',renderSongs);
+
+// ===== INIT =====
+function initSample(){
+  const data=getAll();if(data.songs&&data.songs.length)return;
+  saveAll({
+    songs:[
+      {id:'s1',title:'Como el Ciervo',artist:'',note:'Versión en G — grupo domingo',key:'G',tags:'alabanza',
+       content:`      G         Em        Bm
+Como el ciervo busca por las aguas,
+   C      G    DO  RE
+así clama mi alma por ti Señor.
+
+       SOL    Em     Bm
+Día y noche yo tengo sed de ti
+
+  C              D
+y solo a ti buscaré.
+
+G   D    C          D
+Lléname, lléname Señor,
+G   D    C             D
+dame más, más de tu amor;
+  C   G    C      D    C  D  G
+yo tengo sed solo de ti, lléname Señor.`,parentId:'',createdAt:Date.now()},
+      {id:'s1v',title:'Como el Ciervo',artist:'',note:'Tono C — voz alta',key:'C',tags:'alabanza',
+       content:`      C         Am        Em
+Como el ciervo busca por las aguas,
+   F      C    FA  SOL
+así clama mi alma por ti Señor.
+
+       DO     Am     Em
+Día y noche yo tengo sed de ti
+
+  F              G
+y solo a ti buscaré.`,parentId:'s1',createdAt:Date.now()},
+      {id:'s2',title:'Bésame Mucho',artist:'Consuelo Velázquez',note:'Bolero clásico',key:'Dm',tags:'bolero',
+       content:`Dm                 A7
+Bésame, bésame mucho,
+                        A7          Dm
+como si fuera esta noche la última vez.
+Dm                 A7
+Bésame, bésame mucho,
+         A7                      Dm
+que tengo miedo perderte, perderte después.`,parentId:'',createdAt:Date.now()},
+    ],
+    groups:[
+      {id:'g1',name:'Alabanzas',emoji:'✝️',songs:['s1']},
+      {id:'g2',name:'Mis favoritas',emoji:'❤️',songs:['s2']}
+    ]
+  });
+}
+initSample();
+renderSongs();
+</script>
+
+<script>
+// ===== PLS V2 PATCH =====
+(function(){
+const _db=db;
+window.db=function(){
+ const d=_db();
+ d.settings=d.settings||{};
+ (d.songs||[]).forEach(s=>{
+   if(s.favorite===undefined)s.favorite=false;
+   if(s.privateNotes===undefined)s.privateNotes='';
+ });
+ return d;
+};
+
+window.toggleFavoriteSong=function(id){
+ const d=db();
+ const s=d.songs.find(x=>x.id===id);
+ if(!s)return;
+ s.favorite=!s.favorite;
+ saveAll(d);
+ toast(s.favorite?'Favorita añadida ✓':'Favorita quitada ✓');
+ renderSongs();
+};
+
+const oldRender=renderSongs;
+window.renderSongs=function(){
+ oldRender();
+ const list=document.getElementById('songList');
+ const cards=list.querySelectorAll('.song-card');
+ const data=db();
+
+ cards.forEach(card=>{
+   const title=card.querySelector('.song-title');
+   if(title && !title.querySelector('.pls-fav')){
+      const songTitle=title.textContent.trim();
+      const song=data.songs.find(s=>s.title===songTitle && !s.parentId);
+      if(song){
+         const span=document.createElement('span');
+         span.className='pls-fav';
+         span.style.cursor='pointer';
+         span.style.marginLeft='8px';
+         span.textContent=song.favorite?'⭐':'☆';
+         span.onclick=(e)=>{e.stopPropagation();toggleFavoriteSong(song.id)};
+         title.appendChild(span);
+      }
+   }
+ });
+};
+
+setTimeout(()=>{
+ const sw=document.querySelector('.search-row');
+ if(sw && !document.getElementById('favoriteFilter')){
+   const sel=document.createElement('select');
+   sel.id='favoriteFilter';
+   sel.innerHTML='<option value="">Todas</option><option value="fav">⭐ Favoritas</option>';
+   sw.appendChild(sel);
+
+   sel.addEventListener('change',()=>{
+      const fav=sel.value==='fav';
+      document.querySelectorAll('.song-card').forEach(card=>{
+        if(!fav){card.style.display=''; return;}
+        card.style.display=card.innerText.includes('⭐')?'':'none';
+      });
+   });
+ }
+},800);
+
+// Metronomo simple
+setTimeout(()=>{
+ const backup=document.getElementById('tab-backup');
+ if(!backup || document.getElementById('metroBox')) return;
+
+ const div=document.createElement('div');
+ div.className='backup-card';
+ div.id='metroBox';
+ div.innerHTML='<h3>🎵 Metrónomo</h3><input id="bpmInput" type="number" value="72"><br><br><button class="btn-primary" id="metroBtn">Iniciar / Detener</button>';
+ backup.querySelector('.import-wrap').appendChild(div);
+
+ let timer=null;
+ document.getElementById('metroBtn').onclick=()=>{
+   if(timer){clearInterval(timer);timer=null;return;}
+   const bpm=Math.max(30,Number(document.getElementById('bpmInput').value)||72);
+   const ctx=new (window.AudioContext||window.webkitAudioContext)();
+   timer=setInterval(()=>{
+      const o=ctx.createOscillator();
+      const g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value=1000;
+      o.start();
+      g.gain.setValueAtTime(0.05,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.05);
+      o.stop(ctx.currentTime+0.05);
+   },60000/bpm);
+ };
+},1200);
+
+})();
+</script>
+
+</body>
+</html>
